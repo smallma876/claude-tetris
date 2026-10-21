@@ -52,6 +52,14 @@ jobs:
                - **Propuesta de solución**: pasos concretos, sin escribir el código final.
                - **Riesgos y casos borde**: p. ej. tamaños de canvas en `index.html`, IDs que deben seguir sincronizados.
                - **Preguntas abiertas**: solo si el issue es ambiguo.
+
+               Formato del comentario: debe ser Markdown válido para GitHub (GFM).
+               - Usa encabezados `###` para cada sección (p. ej. `### Resumen`), no texto en negrita suelto.
+               - Usa listas con `-` o numeradas con `1.`, con una línea en blanco antes y después de cada lista.
+               - Pon en `código en línea` los nombres de archivos, funciones, variables e IDs.
+               - Usa bloques de código con triple acento grave y lenguaje (```js, ```html) solo para fragmentos cortos.
+               - Separa párrafos y secciones con una línea en blanco. No uses HTML salvo el marcador inicial.
+               - Pasa el cuerpo con saltos de línea reales (p. ej. `-f body="$(cat <<'EOF' ... EOF)"`), nunca con `\n` literales.
             5. Evita comentarios duplicados: busca con `gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments`
                un comentario que contenga `<!-- claude-triage -->`. Si existe, actualízalo con
                `gh api --method PATCH repos/${{ github.repository }}/issues/comments/<id> -f body=...`;
