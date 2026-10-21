@@ -39,6 +39,12 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const themeText = document.getElementById('theme-text');
+
+// El canvas no hereda variables CSS: color de la cuadrícula por tema
+const GRID_COLORS = { dark: '#22222e', light: '#e3e6ee' };
+let gridColor = GRID_COLORS.dark;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -169,7 +175,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -300,5 +306,22 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+
+function setTheme(theme) {
+  const light = theme === 'light';
+  if (light) document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  gridColor = light ? GRID_COLORS.light : GRID_COLORS.dark;
+  themeToggle.setAttribute('aria-checked', String(light));
+  themeText.textContent = light ? 'Modo claro' : 'Modo oscuro';
+  // en pausa/game over el loop no corre: redibujar manualmente
+  draw();
+  drawNext();
+}
+
+themeToggle.addEventListener('click', () => {
+  setTheme(themeToggle.getAttribute('aria-checked') === 'true' ? 'dark' : 'light');
+  themeToggle.blur(); // evita que Space (caída) active el botón enfocado
+});
 
 init();
