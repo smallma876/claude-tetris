@@ -15,7 +15,7 @@ Vanilla JS Tetris (HTML5 Canvas). No `package.json`, no build, no tests, no lint
 Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logic, one script, global state, `'use strict'`).
 
 - `game.js` holds state in module-level `let` vars (`board`, `current`, `next`, `score`, `lines`, `level`, `paused`, `gameOver`, ...) assigned in `init()`. Restart button calls `init()` again.
-- Board is `ROWS x COLS` matrix; cells are `0` or piece type index 1–7. The same index keys `COLORS` and `PIECES` (index 0 is `null`), and piece shape cells hold their own type number.
+- Board is `ROWS x COLS` matrix; cells are `0` or piece type index 1–8. The same index keys `COLORS` and `PIECES` (index 0 is `null`), and piece shape cells hold their own type number.
 - Piece lifecycle: `randomPiece` → `spawn` (promotes `next`, game over if it collides at spawn) → moves via `collide` checks → `lockPiece` (`merge` → `clearLines` → `spawn`).
 - Game loop `loop(ts)` uses `requestAnimationFrame` with a `dropAccum` timer vs `dropInterval`; `dropInterval` recomputed in `clearLines` on level change. Pause/game-over cancel the rAF via `animId`; unpause resets `lastTime` and re-enters `loop`.
 - Rotation: `rotateCW` + horizontal kick offsets `[0,-1,1,-2,2]` in `tryRotate` (no vertical or SRS kicks).
