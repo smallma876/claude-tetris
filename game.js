@@ -291,6 +291,7 @@ function loop(ts) {
 }
 
 function init() {
+  if (!gameOver) updateStats(); // reinicio a mitad de partida (game over ya contó en endGame)
   board = createBoard();
   score = 0;
   lines = 0;
@@ -478,6 +479,13 @@ recordsReset.addEventListener('click', () => {
   nameForm.classList.add('hidden');
   recordBadge.classList.add('hidden');
   renderRecords();
+});
+
+// cerrar/recargar: guardar récord pendiente y stats de la partida en curso
+window.addEventListener('pagehide', () => {
+  if (atStart) return;
+  if (pendingEntry) saveRecord();
+  if (!gameOver) updateStats();
 });
 
 restartBtn.addEventListener('click', () => {
