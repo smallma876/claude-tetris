@@ -240,3 +240,43 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Récords ---- */
+.hidden { display: none !important; }
+.record-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.name-form { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
+.name-form input {
+  width: 9rem;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--board-bg);
+  color: var(--text);
+  user-select: text;
+}
+.name-form button, .link-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+.name-form button:hover, .link-btn:hover { background: var(--accent); color: var(--accent-contrast); }
+.records-section { margin: 8px 0 14px; font-size: 0.85rem; }
+.records-section h2 { font-size: 1rem; letter-spacing: 0.2em; margin-bottom: 6px; }
+#records-table { width: 100%; border-collapse: collapse; margin: 0 auto; }
+#records-table th, #records-table td { padding: 3px 6px; text-align: right; border-bottom: 1px solid var(--border); }
+#records-table th:nth-child(2), #records-table td:nth-child(2) { text-align: left; }
+#records-table tr.current td { background: var(--accent); color: var(--accent-contrast); font-weight: 700; }
+.records-section .stats { margin: 8px 0; color: var(--controls-text); }
+.link-btn { font-size: 0.75rem; padding: 3px 8px; }

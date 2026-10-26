@@ -26,3 +26,9 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 - Canvas size is hardcoded in `index.html` (`board` 300x600 = `COLS*BLOCK` x `ROWS*BLOCK`; `next-canvas` 120x120). Changing `COLS`/`ROWS`/`BLOCK` in `game.js` requires updating those attributes.
 - `drawNext` uses its own 4x4 grid with block size 30, tied to the 120px next-canvas.
 - Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`) must stay in sync with `index.html`.
+
+## Récords
+
+- Sección `// ---- Récords ----` en `game.js`: el juego arranca en `showStart()` (pantalla de inicio, sin rAF) y `init()` solo corre al pulsar Jugar/Enter. En inicio `current`/`next` son `null` (`draw`/`drawNext` lo toleran).
+- `localStorage`: `tetris.records` (top 5 `{name,score,lines,combo,date}`) y `tetris.stats` (`{bestCombo,maxLines}`); siempre en try/catch y validados al leer. Nombres solo vía `textContent`.
+- El `keydown` ignora eventos cuyo target sea `input`/`button`. IDs nuevos: `records-*`, `name-*`, `record-badge`, `stat-combo`, `stat-lines`.
