@@ -166,8 +166,8 @@ function updateHUD() {
 }
 
 // ---- Skins ----
-// Cada skin: nombre, colores (índices 1–8 como COLORS), fondo del tablero
-// (null = el del tema claro/oscuro), color de cuadrícula y función de dibujo.
+// Cada skin: nombre, colores (índices 1–8 como COLORS), color de cuadrícula
+// (null = el del tema; el fondo de Neon va en style.css) y función de dibujo.
 function drawRetro(context, x, y, colorIndex, size, alpha) {
   context.globalAlpha = alpha;
   context.fillStyle = SKINS.retro.colors[colorIndex];
@@ -180,27 +180,36 @@ function drawRetro(context, x, y, colorIndex, size, alpha) {
 function drawNeon(context, x, y, colorIndex, size, alpha) {
   const color = SKINS.neon.colors[colorIndex];
   context.globalAlpha = alpha;
+  context.fillStyle = color;
+  context.globalAlpha = alpha * 0.35;
+  context.fillRect(x * size + 3, y * size + 3, size - 6, size - 6);
+  // el glow solo en el borde (menos costoso)
+  context.globalAlpha = alpha;
   context.shadowColor = color;
   context.shadowBlur = alpha < 1 ? 0 : 12;
   context.strokeStyle = color;
   context.lineWidth = 2;
-  context.fillStyle = 'rgba(0,0,0,0.85)';
-  context.fillRect(x * size + 3, y * size + 3, size - 6, size - 6);
   context.strokeRect(x * size + 3, y * size + 3, size - 6, size - 6);
-  context.fillStyle = color;
-  context.globalAlpha = alpha * 0.35;
-  context.fillRect(x * size + 3, y * size + 3, size - 6, size - 6);
+}
+
+// roundRect con respaldo para navegadores antiguos
+function pathRound(context, x, y, w, h, r) {
+  if (context.roundRect) { context.roundRect(x, y, w, h, r); return; }
+  context.rect(x, y, w, h);
 }
 
 function drawPastel(context, x, y, colorIndex, size, alpha) {
   context.globalAlpha = alpha;
   context.fillStyle = SKINS.pastel.colors[colorIndex];
   context.beginPath();
-  context.roundRect(x * size + 2, y * size + 2, size - 4, size - 4, size * 0.3);
+  pathRound(context, x * size + 2, y * size + 2, size - 4, size - 4, size * 0.3);
   context.fill();
+  context.strokeStyle = 'rgba(0,0,0,0.18)'; // contorno: visible sobre fondo claro
+  context.lineWidth = 1;
+  context.stroke();
   context.fillStyle = 'rgba(255,255,255,0.35)';
   context.beginPath();
-  context.roundRect(x * size + 5, y * size + 5, size - 10, 4, 2);
+  pathRound(context, x * size + 5, y * size + 5, size - 10, 4, 2);
   context.fill();
 }
 
@@ -226,28 +235,24 @@ const SKINS = {
   retro: {
     name: 'Retro',
     colors: COLORS,
-    bg: null,
     grid: null,
     draw: drawRetro,
   },
   neon: {
     name: 'Neon',
     colors: [null, '#00f0ff', '#ffee00', '#d500f9', '#39ff14', '#ff1744', '#2979ff', '#ff9100', '#c6ff00'],
-    bg: '#000000',
     grid: '#1a1a1a',
     draw: drawNeon,
   },
   pastel: {
     name: 'Pastel',
     colors: [null, '#a8e6ef', '#fff3b0', '#e0bbf0', '#c1ecc4', '#f9b9b7', '#bcd8f7', '#fcd5a5', '#d7c4bb'],
-    bg: null,
     grid: null,
     draw: drawPastel,
   },
   pixel: {
     name: 'Pixel art',
     colors: [null, '#29b6f6', '#fdd835', '#8e24aa', '#43a047', '#e53935', '#3949ab', '#fb8c00', '#795548'],
-    bg: null,
     grid: null,
     draw: drawPixel,
   },
@@ -257,11 +262,13 @@ let currentSkin = 'retro';
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  SKINS[currentSkin].draw(context, x, y, colorIndex, size, alpha ?? 1);
-  // reset para que el estado no se filtre entre bloques
-  context.globalAlpha = 1;
-  context.shadowBlur = 0;
-  context.shadowColor = 'transparent';
+  // save/restore para que alpha/shadow no se filtren entre bloques
+  context.save();
+  try {
+    SKINS[currentSkin].draw(context, x, y, colorIndex, size, alpha ?? 1);
+  } finally {
+    context.restore();
+  }
 }
 
 function drawGrid() {
@@ -448,7 +455,9 @@ skinSelect.addEventListener('change', () => {
   skinSelect.blur(); // evita que Space/flechas actúen sobre el select enfocado
 });
 
+{
+  let savedSkin = null;
+  try { savedSkin = localStorage.getItem(SKIN_KEY); } catch (e) { /* sin almacenamiento */ }
+  setSkin(savedSkin, false);
+}
 init();
-let savedSkin = null;
-try { savedSkin = localStorage.getItem(SKIN_KEY); } catch (e) { /* sin almacenamiento */ }
-setSkin(savedSkin, false);
