@@ -22,6 +22,12 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 - Input: single `keydown` listener at bottom of `game.js` using `e.code`.
 - Pause menu: `P`/`Escape` → `togglePause` → `showPauseMenu` (section `// ---- Menú de pausa ----` before final `init()`), rendered inside `#overlay` as `#pause-menu`. `startLevel` (1–10, persisted in `localStorage` key `tetris.startLevel`) feeds `init` and `clearLines` (`level = baseLevel + floor(lines/10)`, `baseLevel` captured from `startLevel` in `init`, `levelInterval(level)`). While paused the `keydown` listener ignores game keys; `resumeGuard` drops held-key repeats after resume. `endGame` calls `hidePauseMenu` so game over shows the plain overlay.
 
+## Récords
+
+- Sección `// ---- Récords ----` en `game.js`: el juego arranca en `showStart()` (pantalla de inicio, sin rAF) y `init()` solo corre al pulsar Jugar/Enter. En inicio `current`/`next` son `null` (`draw`/`drawNext` lo toleran).
+- `localStorage`: `tetris.records` (top 5 `{name,score,lines,combo,date}`) y `tetris.stats` (`{bestCombo,maxLines}`); siempre en try/catch y validados al leer. Nombres solo vía `textContent`.
+- El `keydown` ignora eventos cuyo target sea `input`/`button`. IDs nuevos: `records-*`, `name-*`, `record-badge`, `stat-combo`, `stat-lines`.
+
 ## Gotchas
 
 - Canvas size is hardcoded in `index.html` (`board` 300x600 = `COLS*BLOCK` x `ROWS*BLOCK`; `next-canvas` 120x120). Changing `COLS`/`ROWS`/`BLOCK` in `game.js` requires updating those attributes.
