@@ -240,3 +240,27 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Skins ---- */
+[data-skin="neon"] #board,
+[data-skin="neon"] #next-canvas { background: #000; }
+[data-skin="pastel"] #board,
+[data-skin="pastel"] #next-canvas { background: #fdf7fa; }
+[data-skin="pixel"] #board,
+[data-skin="pixel"] #next-canvas { background: #10131c; }
+
+.skin-select {
+  background: var(--kbd-bg);
+  color: var(--controls-text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skin-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

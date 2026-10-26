@@ -21,8 +21,10 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 - Rotation: `rotateCW` + horizontal kick offsets `[0,-1,1,-2,2]` in `tryRotate` (no vertical or SRS kicks).
 - Input: single `keydown` listener at bottom of `game.js` using `e.code`.
 
+- Skins: sección `// ---- Skins ----` en `game.js`. Objeto `SKINS` (`retro`, `neon`, `pastel`, `pixel`), cada uno con `colors`, `drawBlock(context,x,y,i,size,alpha)` y opcionales `boardBg`/`grid`. El `drawBlock` global despacha a `SKINS[currentSkin]`; `setSkin` pone `data-skin` en `<html>` (fondo CSS de los canvas), persiste en `localStorage` clave `tetris.skin` y redibuja. Selector `#skin-select`.
+
 ## Gotchas
 
 - Canvas size is hardcoded in `index.html` (`board` 300x600 = `COLS*BLOCK` x `ROWS*BLOCK`; `next-canvas` 120x120). Changing `COLS`/`ROWS`/`BLOCK` in `game.js` requires updating those attributes.
 - `drawNext` uses its own 4x4 grid with block size 30, tied to the 120px next-canvas.
-- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`) must stay in sync with `index.html`.
+- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`, `skin-select`) must stay in sync with `index.html`.
