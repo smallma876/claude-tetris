@@ -43,12 +43,23 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 const themeText = document.getElementById('theme-text');
+const pauseMenu = document.getElementById('pause-menu');
+const pauseResumeBtn = document.getElementById('pause-resume');
+const pauseRestartBtn = document.getElementById('pause-restart');
+const pauseControlsBtn = document.getElementById('pause-controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const pauseStartLevel = document.getElementById('pause-start-level');
 
 // El canvas no hereda variables CSS: color de la cuadrícula por tema
 const GRID_COLORS = { dark: '#22222e', light: '#e3e6ee' };
 let gridColor = GRID_COLORS.dark;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let startLevel = 1, baseLevel = 1, resumeGuard = false;
+
+function levelInterval(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -114,8 +125,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = baseLevel + Math.floor(lines / 10);
+    dropInterval = levelInterval(level);
     updateHUD();
   }
 }
@@ -229,6 +240,7 @@ function drawNext() {
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
+  hidePauseMenu();
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
@@ -242,11 +254,75 @@ function togglePause() {
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
+
+// ---- Menú de pausa ----
+function loadStartLevel() {
+  try {
+    const v = parseInt(localStorage.getItem('tetris.startLevel'), 10);
+    if (v >= 1 && v <= 10) return v;
+  } catch (e) { /* almacenamiento no disponible */ }
+  return 1;
+}
+
+function saveStartLevel(v) {
+  try { localStorage.setItem('tetris.startLevel', String(v)); } catch (e) { /* ignorar */ }
+}
+
+function setControlsOpen(open) {
+  pauseControls.classList.toggle('hidden', !open);
+  pauseControlsBtn.setAttribute('aria-expanded', String(open));
+}
+
+function showPauseMenu() {
+  overlayTitle.textContent = 'PAUSA';
+  overlayScore.textContent = '';
+  restartBtn.classList.add('hidden');
+  setControlsOpen(false);
+  pauseStartLevel.value = String(startLevel);
+  pauseMenu.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+  pauseResumeBtn.focus();
+}
+
+function hidePauseMenu() {
+  pauseMenu.classList.add('hidden');
+  restartBtn.classList.remove('hidden');
+}
+
+function resumeGame() {
+  if (!paused || gameOver) return;
+  paused = false;
+  resumeGuard = true;
+  hidePauseMenu();
+  overlay.classList.add('hidden');
+  lastTime = performance.now();
+  cancelAnimationFrame(animId);
+  loop(lastTime);
+}
+
+for (let i = 1; i <= 10; i++) {
+  const opt = document.createElement('option');
+  opt.value = String(i);
+  opt.textContent = String(i);
+  pauseStartLevel.appendChild(opt);
+}
+startLevel = loadStartLevel();
+pauseStartLevel.value = String(startLevel);
+
+pauseResumeBtn.addEventListener('click', () => { pauseResumeBtn.blur(); resumeGame(); });
+pauseRestartBtn.addEventListener('click', () => { pauseRestartBtn.blur(); init(); });
+pauseControlsBtn.addEventListener('click', () => {
+  setControlsOpen(pauseControls.classList.contains('hidden'));
+  pauseControlsBtn.blur();
+});
+pauseStartLevel.addEventListener('change', () => {
+  startLevel = parseInt(pauseStartLevel.value, 10) || 1;
+  saveStartLevel(startLevel);
+  pauseStartLevel.blur();
+});
 
 function loop(ts) {
   const dt = ts - lastTime;
@@ -270,10 +346,12 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  hidePauseMenu();
+  baseLevel = startLevel;
+  level = baseLevel;
+  dropInterval = levelInterval(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
@@ -285,8 +363,21 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  const tag = e.target && e.target.tagName;
+  if (tag === 'SELECT') return; // Esc en el desplegable solo lo cierra
+  if (tag === 'INPUT' || tag === 'BUTTON') {
+    if (e.code === 'Space' || e.code === 'Enter') return;
+  }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (e.repeat) return;
+    if (paused) resumeGame(); else togglePause();
+    return;
+  }
   if (paused || gameOver) return;
+  if (resumeGuard) {
+    if (e.repeat) return; // tecla mantenida desde antes de reanudar
+    resumeGuard = false;
+  }
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -308,6 +399,8 @@ document.addEventListener('keydown', e => {
   }
   updateHUD();
 });
+
+document.addEventListener('keyup', () => { resumeGuard = false; });
 
 restartBtn.addEventListener('click', init);
 

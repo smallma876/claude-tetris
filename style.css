@@ -240,3 +240,59 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Menú de pausa ---- */
+.pause-menu.hidden,
+#restart-btn.hidden,
+.pause-controls.hidden {
+  display: none;
+}
+
+.pause-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  min-width: 200px;
+}
+
+.pause-menu button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+.pause-menu button:hover {
+  background: var(--accent-hover);
+}
+
+.pause-controls {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pause-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.pause-level select {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
