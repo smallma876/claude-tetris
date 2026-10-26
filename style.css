@@ -200,9 +200,8 @@ kbd {
 [data-skin="neon"] #next-canvas { background: #000; }
 [data-skin="pastel"] #board,
 [data-skin="pastel"] #next-canvas { background: #fdf6f0; }
-[data-theme="dark"][data-skin="pastel"] #board { background: #2a2733; }
-[data-skin="pixel"] #board,
-[data-skin="pixel"] #next-canvas { image-rendering: pixelated; }
+[data-theme="dark"][data-skin="pastel"] #board,
+[data-theme="dark"][data-skin="pastel"] #next-canvas { background: #2a2733; }
 
 /* ---- Overlay ---- */
 .overlay {

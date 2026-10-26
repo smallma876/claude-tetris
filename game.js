@@ -247,9 +247,6 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.save();
   SKINS[currentSkin].drawBlock(context, x, y, colorIndex, size, alpha);
   context.restore();
-  context.globalAlpha = 1;
-  context.shadowBlur = 0;
-  context.shadowColor = 'rgba(0,0,0,0)';
 }
 
 function setSkin(name, persist) {
@@ -379,7 +376,11 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.target instanceof HTMLSelectElement) return;
+  if (e.target instanceof HTMLSelectElement) {
+    if (e.code !== 'KeyP') return;
+    e.preventDefault();
+    e.target.blur();
+  }
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
