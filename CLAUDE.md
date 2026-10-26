@@ -25,7 +25,7 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 
 - Canvas size is hardcoded in `index.html` (`board` 300x600 = `COLS*BLOCK` x `ROWS*BLOCK`; `next-canvas` 120x120). Changing `COLS`/`ROWS`/`BLOCK` in `game.js` requires updating those attributes.
 - `drawNext` uses its own 4x4 grid with block size 30, tied to the 120px next-canvas.
-- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`) must stay in sync with `index.html`.
+- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`, `pause-menu`, `pause-resume`, `pause-restart`, `pause-controls-btn`, `pause-controls`, `pause-start-level`) must stay in sync with `index.html`.
 
 ## Menú de pausa
 

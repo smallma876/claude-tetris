@@ -249,12 +249,12 @@ function endGame() {
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
-  if (!paused) {
-    lastTime = performance.now();
-    loop(lastTime);
-  } else {
+  if (paused) {
     cancelAnimationFrame(animId);
     showPauseMenu();
+  } else {
+    paused = true;
+    resumeGame();
   }
 }
 
@@ -297,6 +297,7 @@ function resumeGame() {
   paused = false;
   resumeGuard = true;
   hidePauseMenu();
+  if (document.activeElement) document.activeElement.blur();
   overlay.classList.add('hidden');
   lastTime = performance.now();
   cancelAnimationFrame(animId);
@@ -366,7 +367,7 @@ document.addEventListener('keydown', e => {
   const tag = e.target && e.target.tagName;
   if (tag === 'SELECT') return; // Esc en el desplegable solo lo cierra
   if (tag === 'INPUT' || tag === 'BUTTON') {
-    if (e.code === 'Space' || e.code === 'Enter') return;
+    if (paused && (e.code === 'Space' || e.code === 'Enter')) return;
   }
   if (e.code === 'KeyP' || e.code === 'Escape') {
     if (e.repeat) return;
@@ -400,7 +401,9 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-document.addEventListener('keyup', () => { resumeGuard = false; });
+document.addEventListener('keyup', e => {
+  if (e.code !== 'KeyP' && e.code !== 'Escape') resumeGuard = false;
+});
 
 restartBtn.addEventListener('click', init);
 
