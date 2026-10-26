@@ -205,6 +205,7 @@ const SKINS = {
     },
   },
   pastel: {
+    grid: '#efe3ea',
     colors: [null, '#a8e6ef', '#fff1a8', '#d9b8f0', '#b8e6b8', '#f5b5b5', '#b5d3f5', '#fcd5a5', '#d4bfb6'],
     drawBlock(context, x, y, i, size, alpha) {
       context.globalAlpha = alpha ?? 1;
