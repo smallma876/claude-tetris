@@ -55,7 +55,8 @@ const GRID_COLORS = { dark: '#22222e', light: '#e3e6ee' };
 let gridColor = GRID_COLORS.dark;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
-let startLevel = 1, baseLevel = 1, resumeGuard = false;
+let startLevel = 1, baseLevel = 1;
+const heldKeys = new Set(), resumeGuard = new Set();
 
 function levelInterval(lvl) {
   return Math.max(100, 1000 - (lvl - 1) * 90);
@@ -295,7 +296,8 @@ function hidePauseMenu() {
 function resumeGame() {
   if (!paused || gameOver) return;
   paused = false;
-  resumeGuard = true;
+  resumeGuard.clear();
+  heldKeys.forEach(c => { if (c !== 'KeyP' && c !== 'Escape') resumeGuard.add(c); });
   hidePauseMenu();
   if (document.activeElement) document.activeElement.blur();
   overlay.classList.add('hidden');
@@ -364,6 +366,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  heldKeys.add(e.code);
   const tag = e.target && e.target.tagName;
   if (tag === 'SELECT') return; // Esc en el desplegable solo lo cierra
   if (tag === 'INPUT' || tag === 'BUTTON') {
@@ -375,9 +378,9 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (paused || gameOver) return;
-  if (resumeGuard) {
+  if (resumeGuard.has(e.code)) {
     if (e.repeat) return; // tecla mantenida desde antes de reanudar
-    resumeGuard = false;
+    resumeGuard.delete(e.code);
   }
   switch (e.code) {
     case 'ArrowLeft':
@@ -402,7 +405,8 @@ document.addEventListener('keydown', e => {
 });
 
 document.addEventListener('keyup', e => {
-  if (e.code !== 'KeyP' && e.code !== 'Escape') resumeGuard = false;
+  heldKeys.delete(e.code);
+  resumeGuard.delete(e.code);
 });
 
 restartBtn.addEventListener('click', init);
