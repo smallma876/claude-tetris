@@ -250,7 +250,8 @@ function endGame() {
   recordsSection.classList.remove('hidden');
   renderRecords();
   overlay.classList.remove('hidden');
-  if (pendingEntry) { nameInput.focus(); nameInput.select(); }
+  // retraso: evita que una tecla aún pulsada (Space) escriba en el campo
+  if (pendingEntry) setTimeout(() => { if (pendingEntry) { nameInput.focus(); nameInput.select(); } }, 600);
 }
 
 function togglePause() {
@@ -465,6 +466,7 @@ nameForm.addEventListener('submit', e => {
 });
 
 recordsReset.addEventListener('click', () => {
+  recordsReset.blur();
   if (!confirm('¿Borrar todos los récords y estadísticas?')) return;
   try {
     localStorage.removeItem(RECORDS_KEY);
