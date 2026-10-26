@@ -48,6 +48,10 @@ const themeText = document.getElementById('theme-text');
 const GRID_COLORS = { dark: '#22222e', light: '#e3e6ee' };
 let gridColor = GRID_COLORS.dark;
 
+// Nivel con el que empieza la próxima partida (menú de pausa)
+let startLevel = 1;
+// Instante hasta el cual se ignoran las teclas de juego tras reanudar
+let inputBlockedUntil = 0;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
 function createBoard() {
@@ -114,7 +118,7 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
+    level = Math.floor(lines / 10) + 1 + (startLevel - 1);
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
@@ -238,13 +242,13 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    hidePauseMenu();
+    inputBlockedUntil = performance.now() + 250;
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
 
@@ -270,23 +274,40 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = Math.max(100, 1000 - (level - 1) * 90);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  hidePauseMenu();
+  inputBlockedUntil = 0;
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    // Esc sobre el selector de nivel solo cierra su desplegable
+    if (e.code === 'Escape' && e.target === pauseLevelSelect) return;
+    if (!e.repeat) togglePause();
+    return;
+  }
+  if (paused) {
+    // menú abierto: ninguna tecla de juego debe actuar (ni activar botones con Space)
+    if (e.code === 'Space' && !pauseMenu.contains(e.target)) e.preventDefault();
+    return;
+  }
+  if (gameOver) return;
+  // gracia tras reanudar: evita movimientos por teclas aún pulsadas
+  if (performance.now() < inputBlockedUntil) {
+    if (e.code === 'Space') e.preventDefault();
+    return;
+  }
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -310,6 +331,46 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+
+// ---- Menú de pausa ----
+const pauseMenu = document.getElementById('pause-menu');
+const pauseResumeBtn = document.getElementById('pause-resume');
+const pauseRestartBtn = document.getElementById('pause-restart');
+const pauseControlsBtn = document.getElementById('pause-controls-btn');
+const pauseControlsList = document.getElementById('pause-controls');
+const pauseLevelSelect = document.getElementById('pause-level');
+
+function showPauseMenu() {
+  pauseControlsList.classList.add('hidden');
+  pauseControlsBtn.setAttribute('aria-expanded', 'false');
+  pauseLevelSelect.value = String(startLevel);
+  pauseMenu.classList.remove('hidden');
+}
+
+function hidePauseMenu() {
+  pauseMenu.classList.add('hidden');
+}
+
+pauseResumeBtn.addEventListener('click', () => {
+  pauseResumeBtn.blur();
+  if (paused) togglePause();
+});
+
+pauseRestartBtn.addEventListener('click', () => {
+  pauseRestartBtn.blur();
+  init();
+});
+
+pauseControlsBtn.addEventListener('click', () => {
+  const hidden = pauseControlsList.classList.toggle('hidden');
+  pauseControlsBtn.setAttribute('aria-expanded', String(!hidden));
+  pauseControlsBtn.blur();
+});
+
+pauseLevelSelect.addEventListener('change', () => {
+  startLevel = parseInt(pauseLevelSelect.value, 10) || 1;
+  pauseLevelSelect.blur();
+});
 
 function setTheme(theme) {
   const light = theme === 'light';
