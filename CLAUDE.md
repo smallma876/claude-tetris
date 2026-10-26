@@ -18,6 +18,7 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 - Board is `ROWS x COLS` matrix; cells are `0` or piece type index 1–8. The same index keys `COLORS` and `PIECES` (index 0 is `null`), and piece shape cells hold their own type number.
 - Piece lifecycle: `randomPiece` → `spawn` (promotes `next`, game over if it collides at spawn) → moves via `collide` checks → `lockPiece` (`merge` → `clearLines` → `spawn`).
 - Game loop `loop(ts)` uses `requestAnimationFrame` with a `dropAccum` timer vs `dropInterval`; `dropInterval` recomputed in `clearLines` on level change. Pause/game-over cancel the rAF via `animId`; unpause resets `lastTime` and re-enters `loop`.
+- Skins: tabla `SKINS` (retro, neon, pastel, pixel) con `colors`, `bg`, `grid` y `draw`; `drawBlock` delega en la skin activa (`currentSkin`), `setSkin()` aplica en vivo (atributo `data-skin` en `<html>`, `localStorage` clave `tetris-skin`) y `updateGridColor()` combina skin y tema claro/oscuro. `COLORS` es la paleta de Retro.
 - Rotation: `rotateCW` + horizontal kick offsets `[0,-1,1,-2,2]` in `tryRotate` (no vertical or SRS kicks).
 - Input: single `keydown` listener at bottom of `game.js` using `e.code`.
 
