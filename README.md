@@ -43,6 +43,8 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
 - **Skins** (Retro, Neon, Pastel, Pixel art) seleccionables desde el panel lateral (`#skin-select`); el cambio es instantáneo y la preferencia se guarda en `localStorage` (clave `tetris.skin`).
+- **Pantalla de inicio** (botón _Jugar_ o `Enter`) y **récords locales**: top 5 con nombre, líneas y combo, más mejor combo y líneas máximas históricas, guardados en `localStorage` (`tetris.records`, `tetris.stats`). Incluye botón _Resetear récords_.
+- **Menú de pausa** (`P` o `Esc`): Reanudar, Reiniciar, Ver controles y selector de **Nivel inicial** (1–10, se guarda en `localStorage` con la clave `tetris.startLevel`). Mientras el menú está abierto se bloquean los controles del juego.
 
 ---
 
@@ -85,7 +87,7 @@ Después abre `http://localhost:8000` en el navegador.
 | `↑` o `X` | Rotar la pieza en sentido horario |
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
-| `P`       | Pausar / reanudar                 |
+| `P` o `Esc` | Pausar / reanudar (abre el menú de pausa) |
 
 ---
 
