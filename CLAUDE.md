@@ -20,9 +20,10 @@ Three files: `index.html` (DOM + two canvases), `style.css`, `game.js` (all logi
 - Game loop `loop(ts)` uses `requestAnimationFrame` with a `dropAccum` timer vs `dropInterval`; `dropInterval` recomputed in `clearLines` on level change. Pause/game-over cancel the rAF via `animId`; unpause resets `lastTime` and re-enters `loop`.
 - Rotation: `rotateCW` + horizontal kick offsets `[0,-1,1,-2,2]` in `tryRotate` (no vertical or SRS kicks).
 - Input: single `keydown` listener at bottom of `game.js` using `e.code`.
+- Pause menu: `P`/`Escape` → `togglePause` → `showPauseMenu` (section `// ---- Menú de pausa ----` before final `init()`), rendered inside `#overlay` as `#pause-menu`. `startLevel` (1–10, persisted in `localStorage` key `tetris.startLevel`) feeds `init` and `clearLines` (`level = baseLevel + floor(lines/10)`, `baseLevel` captured from `startLevel` in `init`, `levelInterval(level)`). While paused the `keydown` listener ignores game keys; `resumeGuard` drops held-key repeats after resume. `endGame` calls `hidePauseMenu` so game over shows the plain overlay.
 
 ## Gotchas
 
 - Canvas size is hardcoded in `index.html` (`board` 300x600 = `COLS*BLOCK` x `ROWS*BLOCK`; `next-canvas` 120x120). Changing `COLS`/`ROWS`/`BLOCK` in `game.js` requires updating those attributes.
 - `drawNext` uses its own 4x4 grid with block size 30, tied to the 120px next-canvas.
-- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`) must stay in sync with `index.html`.
+- Element IDs referenced in `game.js` (`board`, `next-canvas`, `score`, `lines`, `level`, `overlay`, `overlay-title`, `overlay-score`, `restart-btn`, `pause-menu`, `pause-resume`, `pause-restart`, `pause-controls-btn`, `pause-controls`, `pause-start-level`) must stay in sync with `index.html`.

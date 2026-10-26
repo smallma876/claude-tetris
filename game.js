@@ -114,8 +114,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = baseLevel + Math.floor(lines / 10);
+    dropInterval = levelInterval(level);
     updateHUD();
   }
 }
@@ -229,6 +229,7 @@ function drawNext() {
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
+  hidePauseMenu();
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
@@ -238,13 +239,14 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    hidePauseMenu();
+    overlay.classList.add('hidden');
+    resumeGuard = true;
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
 
@@ -270,23 +272,31 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  baseLevel = startLevel; // el selector solo afecta a la próxima partida
+  level = baseLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = levelInterval(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
+  hidePauseMenu();
   overlay.classList.add('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (e.target.tagName === 'SELECT' && e.code === 'Escape') return; // Esc cierra el desplegable
+    if (!e.repeat) togglePause();
+    return;
+  }
   if (paused || gameOver) return;
+  // tras reanudar, ignorar teclas mantenidas hasta soltarlas
+  if (resumeGuard && e.repeat) return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -311,6 +321,8 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+document.addEventListener('keyup', () => { resumeGuard = false; });
+
 function setTheme(theme) {
   const light = theme === 'light';
   if (light) document.documentElement.setAttribute('data-theme', 'light');
@@ -326,6 +338,63 @@ function setTheme(theme) {
 themeToggle.addEventListener('click', () => {
   setTheme(themeToggle.getAttribute('aria-checked') === 'true' ? 'dark' : 'light');
   themeToggle.blur(); // evita que Space (caída) active el botón enfocado
+});
+
+// ---- Menú de pausa ----
+const START_LEVEL_KEY = 'tetris.startLevel';
+const pauseMenu = document.getElementById('pause-menu');
+const pauseResumeBtn = document.getElementById('pause-resume');
+const pauseRestartBtn = document.getElementById('pause-restart');
+const pauseControlsBtn = document.getElementById('pause-controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const startLevelSelect = document.getElementById('pause-start-level');
+let startLevel = 1;
+let baseLevel = 1;
+let resumeGuard = false;
+
+try {
+  const saved = parseInt(localStorage.getItem(START_LEVEL_KEY), 10);
+  if (saved >= 1 && saved <= 10) startLevel = saved;
+} catch (e) { /* localStorage no disponible */ }
+startLevelSelect.value = String(startLevel);
+
+function levelInterval(lv) {
+  return Math.max(100, 1000 - (lv - 1) * 90);
+}
+
+function showPauseMenu() {
+  overlayTitle.textContent = 'PAUSA';
+  overlayScore.textContent = '';
+  restartBtn.classList.add('hidden');
+  pauseControls.classList.add('hidden');
+  pauseMenu.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+}
+
+function hidePauseMenu() {
+  pauseMenu.classList.add('hidden');
+  restartBtn.classList.remove('hidden');
+}
+
+pauseResumeBtn.addEventListener('click', () => {
+  pauseResumeBtn.blur();
+  if (paused) togglePause();
+});
+
+pauseRestartBtn.addEventListener('click', () => {
+  pauseRestartBtn.blur();
+  init();
+});
+
+pauseControlsBtn.addEventListener('click', () => {
+  pauseControls.classList.toggle('hidden');
+  pauseControlsBtn.blur();
+});
+
+startLevelSelect.addEventListener('change', () => {
+  startLevel = parseInt(startLevelSelect.value, 10) || 1;
+  try { localStorage.setItem(START_LEVEL_KEY, String(startLevel)); } catch (e) { /* ignorar */ }
+  startLevelSelect.blur();
 });
 
 init();
